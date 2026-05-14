@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Habit Tracker
 
-## Getting Started
+Aplicativo web para criar hábitos, marcar como concluídos diariamente e acompanhar streaks ao longo do tempo.
 
-First, run the development server:
+## Stack
+
+- **Frontend:** Next.js 16 (App Router) + React 19 + Tailwind CSS
+- **Backend:** Next.js Route Handlers (API)
+- **Banco:** MongoDB Atlas + Mongoose
+- **Auth:** NextAuth.js com GitHub OAuth
+
+## Funcionalidades
+
+- Criar, editar e excluir hábitos (com emoji)
+- Marcar hábito como concluído no dia
+- Cálculo automático de streak (dias consecutivos)
+- Calendário visual dos últimos 30 dias
+- Login via GitHub
+
+## Como rodar
+
+### 1. Clone e instale
+
+```bash
+git clone https://github.com/juliocesarfg2004/todolist-habitos.git
+cd todolist-habitos
+npm install
+```
+
+### 2. Configure as variáveis de ambiente
+
+Copie o `.env.example` para `.env.local` e preencha:
+
+```bash
+cp .env.example .env.local
+```
+
+| Variável | Descrição |
+|---|---|
+| `MONGODB_URI` | String de conexão do MongoDB Atlas |
+| `NEXTAUTH_SECRET` | Chave aleatória (gere com `openssl rand -base64 32`) |
+| `NEXTAUTH_URL` | `http://localhost:3000` (dev) |
+| `GITHUB_ID` | Client ID do OAuth App no GitHub |
+| `GITHUB_SECRET` | Client Secret do OAuth App no GitHub |
+
+### 3. MongoDB Atlas
+
+1. Crie uma conta gratuita em [mongodb.com/atlas](https://mongodb.com/atlas)
+2. Crie um cluster M0 (gratuito)
+3. Em **Network Access**, libere `0.0.0.0/0`
+4. Em **Database Access**, crie um usuário com senha
+5. Clique em **Connect** → **Drivers** → copie a string de conexão
+6. Cole no `MONGODB_URI` do `.env.local`
+
+### 4. GitHub OAuth
+
+1. Acesse `github.com/settings/developers` → **OAuth Apps** → **New OAuth App**
+2. Homepage URL: `http://localhost:3000`
+3. Callback URL: `http://localhost:3000/api/auth/callback/github`
+4. Copie o **Client ID** e **Client Secret** para o `.env.local`
+
+### 5. Rode
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estrutura do projeto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── auth/[...nextauth]/   # NextAuth route handler
+│   │   ├── habits/               # CRUD hábitos (GET, POST, PUT, DELETE)
+│   │   └── logs/                 # GET logs, POST toggle conclusão
+│   ├── dashboard/                # Página principal
+│   ├── habits/[id]/              # Detalhes do hábito
+│   └── login/                    # Página de login
+├── components/
+│   ├── header.tsx                # Topo com email e sair
+│   ├── habit-card.tsx            # Card + drawer lateral com calendário
+│   └── create-habit-modal.tsx    # Modal de criação
+├── lib/
+│   ├── auth.ts                   # Configuração NextAuth
+│   ├── mongoose.ts               # Conexão MongoDB
+│   ├── streak.ts                 # Cálculo de streak
+│   └── mongodb-adapter.ts        # Adapter NextAuth para MongoDB
+└── models/
+    ├── Habit.ts                  # Schema Mongoose
+    └── Log.ts                    # Schema com índice unique habitId+date
+```
 
-## Learn More
+## Deploy na Vercel
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Conecte o repositório na [vercel.com](https://vercel.com)
+2. Adicione as mesmas env vars do `.env.local` no painel da Vercel
+3. Deploy automático a cada push no `main`
